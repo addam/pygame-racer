@@ -33,11 +33,8 @@ class AbstractCar:
         self.x, self.y = self.START_POS
         self.acceleration = 0.1
 
-    def rotate(self, left=False, right=False):
-        if left:
-            self.angle += self.rotation_vel
-        elif right:
-            self.angle -= self.rotation_vel
+    def rotate(self, amount):
+        self.angle += self.rotation_vel * amount
 
     def draw(self, win):
         blit_rotate_center(win, self.img, (self.x, self.y), self.angle)
@@ -80,29 +77,29 @@ class AbstractCar:
 
 class PlayerCar(AbstractCar):
     IMG = RED_CAR
-    START_POS = (180, 200)
+    START_POS = (150, 200)
 
     def decide(self, distances):
         forward = 0
         side = 0
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
+        if keys[pygame.K_LEFT]:
             side += 1
-        if keys[pygame.K_d]:
+        if keys[pygame.K_RIGHT]:
             side -= 1
-        if keys[pygame.K_w]:
+        if keys[pygame.K_UP]:
             forward += 1
-        if keys[pygame.K_s]:
+        if keys[pygame.K_DOWN]:
             forward -= 1
         return forward, side
 
 
 class AdamCar(AbstractCar):
     IMG = GREEN_CAR
-    START_POS = (150, 200)
+    START_POS = (180, 200)
 
     def decide(self, distances):
-        return 1, 0
+        return 1, 0.05
 
 
 def draw(win, images, cars):
@@ -117,10 +114,7 @@ def draw(win, images, cars):
 def move(car):
     distances = None # TODO!
     forward, side = car.decide(distances)
-    if side > 0:
-        car.rotate(left=True)
-    elif side < 0:
-        car.rotate(right=True)
+    car.rotate(side)
     if forward > 0:
         car.move_forward()
     elif forward < 0:
