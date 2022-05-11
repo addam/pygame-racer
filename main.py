@@ -102,7 +102,9 @@ class AdamCar(AbstractCar):
     START_POS = (180, 200)
 
     def decide(self, distances):
-        return 1, 0.05
+        speed = 0.1 if distances[0] < 10 else 1
+        side = 10 if distances[3] > distances[33] else -10
+        return speed, side
 
 
 def draw(win, images, cars):
@@ -147,7 +149,7 @@ def play():
     images = [(GRASS, (0, 0)), (TRACK, (0, 0)),
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
     cars = [
-        PlayerCar(),
+        # PlayerCar(),
         AdamCar()
     ]
     
