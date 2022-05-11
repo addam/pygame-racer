@@ -114,8 +114,18 @@ def draw(win, images, cars):
     pygame.display.update()
 
 
+def cast_ray(angle, car, mask):
+    for i in range(1000):
+        rad = math.radians(angle)
+        x = i * math.sin(rad)
+        y = i * math.cos(rad)
+        if car.collide(mask, x, y):
+            pygame.draw.line(WIN, (255, 128, 128), (car.x, car.y), (car.x - x, car.y - y))
+            return i
+    return 1000
+
 def move(car):
-    distances = None # TODO!
+    distances = [cast_ray(angle + car.angle, car, TRACK_BORDER_MASK) for angle in range(0, 360, 10)]
     forward, side = car.decide(distances)
     car.rotate(side)
     if forward > 0:
