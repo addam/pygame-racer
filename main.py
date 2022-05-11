@@ -129,7 +129,7 @@ def cast_ray(angle, car, mask):
 def move(car):
     distances = [cast_ray(angle + car.angle, car, TRACK_BORDER_MASK) for angle in range(0, 360, 10)]
     forward, side = car.decide(distances)
-    car.rotate(side)
+    car.rotate(max(-0.5, min(side, 0.5)))
     if forward > 0:
         car.move_forward()
     elif forward < 0:
