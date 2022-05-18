@@ -25,11 +25,14 @@ PATH = [(175, 119), (110, 70), (56, 133), (70, 481), (318, 731), (404, 680), (41
 
 FPS = 60
 
+def clamp(x, low, high):
+    return max(low, min(x, high))
+
 
 class AbstractCar:
     def __init__(self):
         self.img = self.IMG
-        self.max_vel = 4
+        self.max_vel = 20
         self.vel = 0
         self.rotation_vel = 4
         self.angle = 0
@@ -37,17 +40,14 @@ class AbstractCar:
         self.acceleration = 0.1
 
     def rotate(self, amount):
-        self.angle += self.rotation_vel * amount
+        self.angle += self.rotation_vel * clamp(amount, -0.5, 0.5)
 
     def draw(self, win):
         blit_rotate_center(win, self.img, (self.x, self.y), self.angle)
 
-    def move_forward(self):
-        self.vel = min(self.vel + self.acceleration, self.max_vel)
-        self.move()
-
-    def move_backward(self):
-        self.vel = max(self.vel - self.acceleration, -self.max_vel/2)
+    def move_forward(self, amount):
+        amount = clamp(amount, -2*self.acceleration, self.acceleration)
+        self.vel = clamp(self.vel + amount, -self.max_vel / 2, self.max_vel)
         self.move()
 
     def move(self):
@@ -64,17 +64,8 @@ class AbstractCar:
         poi = mask.overlap(car_mask, offset)
         return poi
 
-    def reset(self):
-        self.x, self.y = self.START_POS
-        self.angle = 0
-        self.vel = 0
-
-    def reduce_speed(self):
-        self.vel = max(self.vel - self.acceleration / 2, 0)
-        self.move()
-
     def bounce(self):
-        self.vel = -self.vel
+        self.vel = -0.5 * self.vel
         self.move()
 
 
@@ -186,13 +177,8 @@ def cast_ray(angle, car, mask):
 def move(car):
     distances = [cast_ray(angle + car.angle, car, TRACK_BORDER_MASK) for angle in range(0, 360, 10)]
     forward, side = car.decide(distances)
-    car.rotate(max(-0.5, min(side, 0.5)))
-    if forward > 0:
-        car.move_forward()
-    elif forward < 0:
-        car.move_backward()
-    else:
-        car.reduce_speed()
+    car.rotate(side)
+    car.move_forward(forward)
 
 
 def handle_collision(cars):
