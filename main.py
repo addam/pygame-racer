@@ -106,6 +106,63 @@ class AdamCar(AbstractCar):
         side = 10 if distances[3] > distances[33] else -10
         return speed, side
 
+class MichalCar(AbstractCar):
+    IMG = GREEN_CAR
+    START_POS = (180, 200)
+    SPEED_LIMIT = 0
+    forward_start = 0
+
+    def decide(self, distances):
+        speed = 0.1
+        n = 9
+        field = distances[:n]+distances[-n:]
+        best_dist = 0
+        curve_direction = 'F'
+        best_direction = 0
+
+        for i in range(len(field)-2):
+            if sum(field[i:i+2]) > best_dist:
+                best_dist = sum(field[i:i+2])
+                best_direction = i+1
+        
+        best_direction -= n
+        best_direction /= -2*n
+
+        if best_dist>200:
+            curve_direction = 'F'
+            speed = 0.1
+            if distances[9]<distances[-9]:
+                side = -0.5
+            else:
+                side = 0.5
+
+        elif -0.1>best_direction:
+            curve_direction = 'R'
+            speed = 0.1
+            if (True in (ele > 15 for ele in distances[2:9])):
+                side = 0.5
+            else:
+                side = -0.5
+
+        elif 0.1<best_direction:
+            curve_direction = 'L'
+            speed = 0.1
+            if distances[-9]<15:
+                side = 0.5
+            else:
+                side = -0.5
+
+        else:
+            curve_direction = 'F'
+            speed = 0.1
+            if distances[9]<distances[-9]:
+                side = -0.5
+            else:
+                side = 0.5
+
+        print(curve_direction)
+        print(speed)
+        return speed, side
 
 def draw(win, images, cars):
     for img, pos in images:
