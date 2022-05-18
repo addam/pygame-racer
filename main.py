@@ -46,7 +46,10 @@ class AbstractCar:
         blit_rotate_center(win, self.img, (self.x, self.y), self.angle)
 
     def move_forward(self, amount):
-        amount = clamp(amount, -2*self.acceleration, self.acceleration)
+        if self.vel > 0 and amount < 0:
+            amount = max(amount, -5*self.acceleration)
+        else:
+            amount = clamp(amount, -0.5*self.acceleration, self.acceleration)
         self.vel = clamp(self.vel + amount, -self.max_vel / 2, self.max_vel)
         self.move()
 
@@ -93,7 +96,7 @@ class AdamCar(AbstractCar):
     START_POS = (180, 200)
 
     def decide(self, distances):
-        speed = 0.1 if distances[0] < 10 else 1
+        speed = -10 if distances[0] < 30 else 1
         side = 10 if distances[3] > distances[33] else -10
         return speed, side
 
@@ -192,7 +195,7 @@ def play():
     images = [(GRASS, (0, 0)), (TRACK, (0, 0)),
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
     cars = [
-        # PlayerCar(),
+        #MichalCar(),
         AdamCar()
     ]
     
