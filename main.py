@@ -158,6 +158,39 @@ class MichalCar(AbstractCar):
         print(speed)
         return speed, side
 
+class MichalCar2(AbstractCar):
+    IMG = GREEN_CAR
+    START_POS = (180, 200)
+    SPEED_LIMIT = 0
+
+    def decide(self, distances):
+        speed = 1
+        n = 9
+        field = distances[-n:]+distances[:n]
+        best_dist = 0
+        best_direction = 0
+
+        for i in range(len(field)-5):
+            if sum(field[i:i+4]) > best_dist:
+                best_dist = sum(field[i:i+5])
+                best_direction = i+3
+
+        best_direction -= n
+        best_direction /= -2*n
+
+        if best_direction < 0:
+            side = 1
+        elif best_direction > 0:
+            side = -1
+        else:
+            side=0
+
+        if self.vel > 2:
+            speed = -0.1
+        else:
+            speed = 0.1
+        return speed, side
+
 def draw(win, images, cars):
     for img, pos in images:
         win.blit(img, pos)
@@ -195,8 +228,8 @@ def play():
     images = [(GRASS, (0, 0)), (TRACK, (0, 0)),
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
     cars = [
-        #MichalCar(),
-        AdamCar()
+        MichalCar2(),
+        #AdamCar()
     ]
 
     while True:
