@@ -104,65 +104,7 @@ class AdamCar(AbstractCar):
         side = 10 if distances[3] > distances[33] else -10
         return speed, side
 
-class MichalCar(AbstractCar):
-    IMG = GREEN_CAR
-    START_POS = (180, 200)
-    SPEED_LIMIT = 0
-    forward_start = 0
 
-    def decide(self, distances):
-        speed = 0.1
-        n = 9
-        field = distances[:n]+distances[-n:]
-        best_dist = 0
-        curve_direction = 'F'
-        best_direction = 0
-
-        for i in range(len(field)-2):
-            if sum(field[i:i+2]) > best_dist:
-                best_dist = sum(field[i:i+2])
-                best_direction = i+1
-        
-        best_direction -= n
-        best_direction /= -2*n
-
-        if best_dist>200:
-            curve_direction = 'F'
-            speed = 0.1
-            if distances[9]<distances[-9]:
-                side = -0.5
-            else:
-                side = 0.5
-
-        elif -0.1>best_direction:
-            curve_direction = 'R'
-            speed = 0.1
-            if (True in (ele > 15 for ele in distances[2:9])):
-                side = 0.5
-            else:
-                side = -0.5
-
-        elif 0.1<best_direction:
-            curve_direction = 'L'
-            speed = 0.1
-            if distances[-9]<15:
-                side = 0.5
-            else:
-                side = -0.5
-
-        else:
-            curve_direction = 'F'
-            speed = 0.1
-            if distances[9]<distances[-9]:
-                side = -0.5
-            else:
-                side = 0.5
-
-        print(curve_direction)
-        print(speed)
-        return speed, side
-
-<<<<<<< HEAD
 class MichalCar2(AbstractCar):
     IMG = GREEN_CAR
     START_POS = (180, 200)
@@ -190,13 +132,23 @@ class MichalCar2(AbstractCar):
         else:
             side=0
 
-        if self.vel > 2:
-            speed = -0.1
+        if best_dist > 400:
+            max_speed = 8.5
         else:
-            speed = 0.1
+            max_speed=7.5
+
+        if self.vel > max_speed:
+            speed = -0.2
+        elif distances[0] < 20:
+            speed = -0.5
+        elif distances[0] < 50 and self.vel > 1:
+            speed = -0.47
+        elif distances[0] < 70 and self.vel > 4:
+            speed = -0.28
+        else:
+            speed = 1
         return speed, side
 
-=======
 
 class TomasCar(AbstractCar):
     IMG = RED_CAR
@@ -218,7 +170,6 @@ class TomasCar(AbstractCar):
         return speed, side
 
 
->>>>>>> cb9be18bbcd6ac2cb4cddc253d14e80ae77a6b10
 def draw(win, images, cars):
     for img, pos in images:
         win.blit(img, pos)
@@ -260,17 +211,14 @@ def play():
     images = [(GRASS, (0, 0)), (TRACK, (0, 0)),
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
     cars = [
-<<<<<<< HEAD
         MichalCar2(),
         #AdamCar()
-=======
         #MichalCar(),
-        AdamCar(),
+        #AdamCar(),
         TomasCar(),
         # PlayerCar(),
->>>>>>> cb9be18bbcd6ac2cb4cddc253d14e80ae77a6b10
     ]
-    
+
     while True:
         clock.tick(FPS)
         draw(WIN, images, cars)
