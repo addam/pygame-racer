@@ -38,6 +38,10 @@ class AbstractCar:
         self.angle = 0
         self.x, self.y = self.START_POS
         self.acceleration = 0.1
+        self.last_collision = True
+
+    def __str__(self):
+        return type(self).__name__
 
     def rotate(self, amount):
         self.angle += self.rotation_vel * clamp(amount, -0.5, 0.5)
@@ -105,7 +109,7 @@ class MichalCar(AbstractCar):
     START_POS = (180, 200)
     SPEED_LIMIT = 0
     forward_start = 0
-    #jfjk
+
     def decide(self, distances):
         speed = 0.1
         n = 9
@@ -118,7 +122,7 @@ class MichalCar(AbstractCar):
             if sum(field[i:i+2]) > best_dist:
                 best_dist = sum(field[i:i+2])
                 best_direction = i+1
-
+        
         best_direction -= n
         best_direction /= -2*n
 
@@ -158,6 +162,7 @@ class MichalCar(AbstractCar):
         print(speed)
         return speed, side
 
+<<<<<<< HEAD
 class MichalCar2(AbstractCar):
     IMG = GREEN_CAR
     START_POS = (180, 200)
@@ -191,6 +196,29 @@ class MichalCar2(AbstractCar):
             speed = 0.1
         return speed, side
 
+=======
+
+class TomasCar(AbstractCar):
+    IMG = RED_CAR
+    START_POS = (180, 200)
+
+    def decide(self, distances):
+        # proudly zkopirovana logika na zataceni:)
+        side = 10 if (distances[3] + distances[4])/2 > (distances[32] + distances[33])/2 else -10
+        if self.vel > 7.5:
+            speed = -0.2
+        elif distances[0] < 20:
+            speed = -0.5
+        elif distances[0] < 50 and self.vel > 1:
+            speed = -0.47
+        elif distances[0] < 70 and self.vel > 4:
+            speed = -0.28
+        else:
+            speed = 1
+        return speed, side
+
+
+>>>>>>> cb9be18bbcd6ac2cb4cddc253d14e80ae77a6b10
 def draw(win, images, cars):
     for img, pos in images:
         win.blit(img, pos)
@@ -221,17 +249,28 @@ def handle_collision(cars):
     for car in cars:
         if car.collide(TRACK_BORDER_MASK) != None:
             car.bounce()
-
+        is_collision = car.collide(FINISH_MASK, *FINISH_POSITION)
+        if is_collision and not car.last_collision:
+            print(car, current_time)
+        car.last_collision = is_collision
 
 def play():
+    global current_time
     clock = pygame.time.Clock()
     images = [(GRASS, (0, 0)), (TRACK, (0, 0)),
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
     cars = [
+<<<<<<< HEAD
         MichalCar2(),
         #AdamCar()
+=======
+        #MichalCar(),
+        AdamCar(),
+        TomasCar(),
+        # PlayerCar(),
+>>>>>>> cb9be18bbcd6ac2cb4cddc253d14e80ae77a6b10
     ]
-
+    
     while True:
         clock.tick(FPS)
         draw(WIN, images, cars)
@@ -241,6 +280,8 @@ def play():
         for car in cars:
             move(car)
         handle_collision(cars)
+        current_time += 1
 
+current_time = 0
 play()
 pygame.quit()
