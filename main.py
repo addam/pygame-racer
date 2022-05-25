@@ -105,7 +105,7 @@ class MichalCar(AbstractCar):
     START_POS = (180, 200)
     SPEED_LIMIT = 0
     forward_start = 0
-
+    #jfjk
     def decide(self, distances):
         speed = 0.1
         n = 9
@@ -118,7 +118,7 @@ class MichalCar(AbstractCar):
             if sum(field[i:i+2]) > best_dist:
                 best_dist = sum(field[i:i+2])
                 best_direction = i+1
-        
+
         best_direction -= n
         best_direction /= -2*n
 
@@ -198,7 +198,7 @@ def play():
         #MichalCar(),
         AdamCar()
     ]
-    
+
     while True:
         clock.tick(FPS)
         draw(WIN, images, cars)
