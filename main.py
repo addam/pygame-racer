@@ -158,6 +158,27 @@ class MichalCar(AbstractCar):
         print(speed)
         return speed, side
 
+
+class TomasCar(AbstractCar):
+    IMG = RED_CAR
+    START_POS = (180, 200)
+
+    def decide(self, distances):
+        # proudly zkopirovana logika na zataceni:)
+        side = 10 if (distances[3] + distances[4])/2 > (distances[32] + distances[33])/2 else -10
+        if self.vel > 7.5:
+            speed = -0.2
+        elif distances[0] < 20:
+            speed = -0.5
+        elif distances[0] < 50 and self.vel > 1:
+            speed = -0.47
+        elif distances[0] < 70 and self.vel > 4:
+            speed = -0.28
+        else:
+            speed = 1
+        return speed, side
+
+
 def draw(win, images, cars):
     for img, pos in images:
         win.blit(img, pos)
@@ -196,7 +217,8 @@ def play():
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
     cars = [
         #MichalCar(),
-        AdamCar()
+        AdamCar(),
+        TomasCar()
     ]
     
     while True:
