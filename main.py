@@ -38,6 +38,10 @@ class AbstractCar:
         self.angle = 0
         self.x, self.y = self.START_POS
         self.acceleration = 0.1
+        self.last_collision = True
+
+    def __str__(self):
+        return type(self).__name__
 
     def rotate(self, amount):
         self.angle += self.rotation_vel * clamp(amount, -0.5, 0.5)
@@ -188,14 +192,19 @@ def handle_collision(cars):
     for car in cars:
         if car.collide(TRACK_BORDER_MASK) != None:
             car.bounce()
-
+        is_collision = car.collide(FINISH_MASK, *FINISH_POSITION)
+        if is_collision and not car.last_collision:
+            print(car, current_time)
+        car.last_collision = is_collision
 
 def play():
+    global current_time
     clock = pygame.time.Clock()
     images = [(GRASS, (0, 0)), (TRACK, (0, 0)),
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
     cars = [
         #MichalCar(),
+        # PlayerCar(),
         AdamCar()
     ]
     
@@ -208,6 +217,8 @@ def play():
         for car in cars:
             move(car)
         handle_collision(cars)
+        current_time += 1
 
+current_time = 0
 play()
 pygame.quit()
