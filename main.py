@@ -15,6 +15,7 @@ FINISH_POSITION = (130, 250)
 
 RED_CAR = scale_image(pygame.image.load("imgs/red-car.png"), 0.55)
 GREEN_CAR = scale_image(pygame.image.load("imgs/green-car.png"), 0.55)
+PURPLE_CAR = scale_image(pygame.image.load("imgs/purple-car.png"), 0.55)
 
 WIDTH, HEIGHT = TRACK.get_width(), TRACK.get_height()
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -104,6 +105,64 @@ class AdamCar(AbstractCar):
         side = 10 if distances[3] > distances[33] else -10
         return speed, side
 
+class MichalCar(AbstractCar):
+    IMG = GREEN_CAR
+    START_POS = (180, 200)
+    SPEED_LIMIT = 0
+    forward_start = 0
+
+    def decide(self, distances):
+        speed = 0.1
+        n = 9
+        field = distances[:n]+distances[-n:]
+        best_dist = 0
+        curve_direction = 'F'
+        best_direction = 0
+
+        for i in range(len(field)-2):
+            if sum(field[i:i+2]) > best_dist:
+                best_dist = sum(field[i:i+2])
+                best_direction = i+1
+        
+        best_direction -= n
+        best_direction /= -2*n
+
+        if best_dist>200:
+            curve_direction = 'F'
+            speed = 0.1
+            if distances[9]<distances[-9]:
+                side = -0.5
+            else:
+                side = 0.5
+
+        elif -0.1>best_direction:
+            curve_direction = 'R'
+            speed = 0.1
+            if (True in (ele > 15 for ele in distances[2:9])):
+                side = 0.5
+            else:
+                side = -0.5
+
+        elif 0.1<best_direction:
+            curve_direction = 'L'
+            speed = 0.1
+            if distances[-9]<15:
+                side = 0.5
+            else:
+                side = -0.5
+
+        else:
+            curve_direction = 'F'
+            speed = 0.1
+            if distances[9]<distances[-9]:
+                side = -0.5
+            else:
+                side = 0.5
+
+        print(curve_direction)
+        print(speed)
+        return speed, side
+
 
 class MichalCar2(AbstractCar):
     IMG = GREEN_CAR
@@ -132,12 +191,21 @@ class MichalCar2(AbstractCar):
         else:
             side=0
 
-        if best_dist > 400:
-            max_speed = 8.5
+        if self.vel > 2:
+            speed = -0.1
         else:
-            max_speed=7.5
+            speed = 0.1
+        return speed, side
 
-        if self.vel > max_speed:
+
+class TomasCar(AbstractCar):
+    IMG = RED_CAR
+    START_POS = (180, 200)
+
+    def decide(self, distances):
+        # proudly zkopirovana logika na zataceni:)
+        side = 10 if (distances[3] + distances[4])/2 > (distances[32] + distances[33])/2 else -10
+        if self.vel > 7.5:
             speed = -0.2
         elif distances[0] < 20:
             speed = -0.5
@@ -150,13 +218,31 @@ class MichalCar2(AbstractCar):
         return speed, side
 
 
-class TomasCar(AbstractCar):
-    IMG = RED_CAR
+class StolenTomasCar(AbstractCar):
+    IMG = PURPLE_CAR
     START_POS = (180, 200)
 
     def decide(self, distances):
-        # proudly zkopirovana logika na zataceni:)
-        side = 10 if (distances[3] + distances[4])/2 > (distances[32] + distances[33])/2 else -10
+        n = 9
+        field = distances[-n:] + distances[:n]
+        best_dist = 0
+        best_direction = 0
+
+        for i in range(len(field) - 5):
+            if sum(field[i:i + 4]) > best_dist:
+                best_dist = sum(field[i:i + 5])
+                best_direction = i + 3
+
+        best_direction -= n
+        best_direction /= -2 * n
+
+        if best_direction < 0:
+            side = 1
+        elif best_direction > 0:
+            side = -1
+        else:
+            side = 0
+
         if self.vel > 7.5:
             speed = -0.2
         elif distances[0] < 20:
@@ -214,11 +300,11 @@ def play():
         MichalCar2(),
         #AdamCar()
         #MichalCar(),
-        #AdamCar(),
-        TomasCar(),
+        AdamCar(),
+        StolenTomasCar(),
         # PlayerCar(),
     ]
-
+    
     while True:
         clock.tick(FPS)
         draw(WIN, images, cars)
