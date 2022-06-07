@@ -105,72 +105,20 @@ class AdamCar(AbstractCar):
         side = 10 if distances[3] > distances[33] else -10
         return speed, side
 
-class MichalCar(AbstractCar):
-    IMG = GREEN_CAR
-    START_POS = (180, 200)
-    SPEED_LIMIT = 0
-    forward_start = 0
-
-    def decide(self, distances):
-        speed = 0.1
-        n = 9
-        field = distances[:n]+distances[-n:]
-        best_dist = 0
-        curve_direction = 'F'
-        best_direction = 0
-
-        for i in range(len(field)-2):
-            if sum(field[i:i+2]) > best_dist:
-                best_dist = sum(field[i:i+2])
-                best_direction = i+1
-        
-        best_direction -= n
-        best_direction /= -2*n
-
-        if best_dist>200:
-            curve_direction = 'F'
-            speed = 0.1
-            if distances[9]<distances[-9]:
-                side = -0.5
-            else:
-                side = 0.5
-
-        elif -0.1>best_direction:
-            curve_direction = 'R'
-            speed = 0.1
-            if (True in (ele > 15 for ele in distances[2:9])):
-                side = 0.5
-            else:
-                side = -0.5
-
-        elif 0.1<best_direction:
-            curve_direction = 'L'
-            speed = 0.1
-            if distances[-9]<15:
-                side = 0.5
-            else:
-                side = -0.5
-
-        else:
-            curve_direction = 'F'
-            speed = 0.1
-            if distances[9]<distances[-9]:
-                side = -0.5
-            else:
-                side = 0.5
-
-        print(curve_direction)
-        print(speed)
-        return speed, side
-
 
 class MichalCar2(AbstractCar):
     IMG = GREEN_CAR
     START_POS = (180, 200)
-    SPEED_LIMIT = 0
 
     def decide(self, distances):
-        speed = 1
+        def dev(x, y):
+            try:
+                return x/y
+            except:
+                return 0
+
+
+        #side
         n = 9
         field = distances[-n:]+distances[:n]
         best_dist = 0
@@ -182,6 +130,7 @@ class MichalCar2(AbstractCar):
                 best_direction = i+3
 
         best_direction -= n
+        sensor_idx = best_direction
         best_direction /= -2*n
 
         if best_direction < 0:
@@ -189,12 +138,19 @@ class MichalCar2(AbstractCar):
         elif best_direction > 0:
             side = -1
         else:
-            side=0
+            side = 0
 
-        if self.vel > 2:
-            speed = -0.1
+        #speed
+        max_speed = 15
+
+        if dev(self.vel, distances[sensor_idx])>0.1:
+            print('brake'+str(self.vel))
+            speed = -10
         else:
-            speed = 0.1
+            set_speed = max_speed - (abs(best_direction))*50
+
+            speed = set_speed-self.vel
+
         return speed, side
 
 
@@ -300,11 +256,11 @@ def play():
         MichalCar2(),
         #AdamCar()
         #MichalCar(),
-        AdamCar(),
-        StolenTomasCar(),
+        #AdamCar(),
+        #StolenTomasCar(),
         # PlayerCar(),
     ]
-    
+
     while True:
         clock.tick(FPS)
         draw(WIN, images, cars)
