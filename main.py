@@ -33,6 +33,7 @@ def clamp(x, low, high):
 class AbstractCar:
     def __init__(self):
         self.img = self.IMG
+        self.mask = pygame.mask.from_surface(self.img)
         self.max_vel = 20
         self.vel = 0
         self.rotation_vel = 4
@@ -67,9 +68,8 @@ class AbstractCar:
         self.x -= horizontal
 
     def collide(self, mask, x=0, y=0):
-        car_mask = pygame.mask.from_surface(self.img)
         offset = (int(self.x - x), int(self.y - y))
-        poi = mask.overlap(car_mask, offset)
+        poi = mask.overlap(self.mask, offset)
         return poi
 
     def bounce(self):
@@ -94,6 +94,16 @@ class PlayerCar(AbstractCar):
         if keys[pygame.K_DOWN]:
             forward -= 1
         return forward, side
+
+    def draw(self, win):
+        super().draw(win)
+        angle = math.radians(self.angle)
+        radius = 25 * self.vel
+        vx, vy = math.cos(angle), -math.sin(angle)
+        cx, cy = self.x + radius * vx, self.y + radius * vy
+        pygame.draw.arc(win, (255, 0, 0), [cx - radius, cy - radius, 2*radius, 2*radius], 0, 360)
+        cx, cy = self.x - radius * vx, self.y - radius * vy
+        pygame.draw.arc(win, (255, 0, 0), [cx - radius, cy - radius, 2*radius, 2*radius], 0, 360)
 
 
 class AdamCar(AbstractCar):
@@ -209,7 +219,6 @@ def draw(win, images, cars):
 
     for car in cars:
         car.draw(win)
-    pygame.display.update()
 
 
 def cast_ray(angle, car, mask):
@@ -218,7 +227,6 @@ def cast_ray(angle, car, mask):
         x = i * math.sin(rad)
         y = i * math.cos(rad)
         if car.collide(mask, x, y):
-            pygame.draw.line(WIN, (255, 128, 128), (car.x, car.y), (car.x - x, car.y - y))
             return i
     return 1000
 
@@ -228,28 +236,32 @@ def move(car):
     car.rotate(side)
     car.move_forward(forward)
 
+def car_collision(car):
+    if car.collide(TRACK_BORDER_MASK) != None:
+        car.bounce()
+    is_collision = car.collide(FINISH_MASK, *FINISH_POSITION)
+    result = is_collision and not car.last_collision
+    car.last_collision = is_collision
+    return result
 
-def handle_collision(cars):
+def handle_collision(cars, current_time):
     for car in cars:
-        if car.collide(TRACK_BORDER_MASK) != None:
-            car.bounce()
-        is_collision = car.collide(FINISH_MASK, *FINISH_POSITION)
-        if is_collision and not car.last_collision:
+        if car_collision(car):
             print(car, current_time)
-        car.last_collision = is_collision
 
 def play():
-    global current_time
+    current_time = 0
     clock = pygame.time.Clock()
     images = [(GRASS, (0, 0)), (TRACK, (0, 0)),
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
     cars = [
         MichalCar3(),
-        #AdamCar()
-        #MichalCar(),
-        #AdamCar(),
-        #StolenTomasCar(),
-        # PlayerCar(),
+        # AdamCar(),
+        # TomasCar(),
+        # MichalCar2(),
+        # MichalCar(),
+        # StolenTomasCar(),
+        PlayerCar(),
     ]
 
     while True:
@@ -260,9 +272,26 @@ def play():
                 return
         for car in cars:
             move(car)
-        handle_collision(cars)
+        handle_collision(cars, current_time)
+        pygame.display.update()
         current_time += 1
 
-current_time = 0
-play()
-pygame.quit()
+def dry_play(car):
+    current_time = 0
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+        move(car)
+        if car_collision(car):
+            print(car, current_time)
+            break
+        current_time += 1
+
+if __name__ == "__main__":
+    from sys import argv
+    if "-d" in argv:
+        dry_play(MichalCar3())
+    else:
+        play()
+    pygame.quit()
