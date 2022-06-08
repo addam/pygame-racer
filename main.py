@@ -106,32 +106,24 @@ class AdamCar(AbstractCar):
         return speed, side
 
 
-class MichalCar2(AbstractCar):
-    IMG = GREEN_CAR
+
+class MichalCar3(AbstractCar):
+    IMG = RED_CAR
     START_POS = (180, 200)
 
     def decide(self, distances):
-        def dev(x, y):
-            try:
-                return x/y
-            except:
-                return 0
-
-
-        #side
         n = 9
-        field = distances[-n:]+distances[:n]
+        field = distances[-n:] + distances[:n]
         best_dist = 0
         best_direction = 0
 
-        for i in range(len(field)-5):
-            if sum(field[i:i+4]) > best_dist:
-                best_dist = sum(field[i:i+5])
-                best_direction = i+3
+        for i in range(len(field) - 5):
+            if sum(field[i:i + 4]) > best_dist:
+                best_dist = sum(field[i:i + 5])
+                best_direction = i + 3
 
         best_direction -= n
-        sensor_idx = best_direction
-        best_direction /= -2*n
+        best_direction /= -2 * n
 
         if best_direction < 0:
             side = 1
@@ -140,17 +132,16 @@ class MichalCar2(AbstractCar):
         else:
             side = 0
 
-        #speed
-        max_speed = 15
-
-        if dev(self.vel, distances[sensor_idx])>0.1:
-            print('brake'+str(self.vel))
-            speed = -10
+        if self.vel > 7.5:
+            speed = -0.2
+        elif distances[0] < 20:
+            speed = -0.5
+        elif distances[0] < 50 and self.vel > 1:
+            speed = -0.47
+        elif distances[0] < 70 and self.vel > 4:
+            speed = -0.28
         else:
-            set_speed = max_speed - (abs(best_direction))*50
-
-            speed = set_speed-self.vel
-
+            speed = 1
         return speed, side
 
 
@@ -253,7 +244,7 @@ def play():
     images = [(GRASS, (0, 0)), (TRACK, (0, 0)),
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
     cars = [
-        MichalCar2(),
+        MichalCar3(),
         #AdamCar()
         #MichalCar(),
         #AdamCar(),
